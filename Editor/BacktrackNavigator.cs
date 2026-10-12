@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.ShortcutManagement;
 
 namespace Nyvion.Backtrack
 {
@@ -15,6 +16,7 @@ namespace Nyvion.Backtrack
         const double PollInterval = 0.1;
 
         static readonly List<BrowserHook> Hooks = new List<BrowserHook>();
+        static readonly ProjectWindowShortcutContext ShortcutContext = new ProjectWindowShortcutContext();
         static double nextPoll;
         static bool pruned;
 
@@ -23,9 +25,25 @@ namespace Nyvion.Backtrack
             if (!ProjectBrowserBridge.IsAvailable) return;
 
             EditorApplication.update += Tick;
-            AssemblyReloadEvents.beforeAssemblyReload += DetachAll;
+            AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
+            Selection.selectionChanged += OnSelectionChanged;
             BacktrackSettings.HistorySizeChanged += OnHistorySizeChanged;
             BacktrackSettings.HistoryCleared += OnHistoryCleared;
+            ShortcutManager.RegisterContext(ShortcutContext);
+            ShortcutManager.instance.shortcutBindingChanged += OnShortcutsChanged;
+            ShortcutManager.instance.activeProfileChanged += OnShortcutsChanged;
+        }
+
+        /// <summary>Hook of the focused Project window, if it can navigate. Target of the keyboard shortcuts.</summary>
+        public static BrowserHook FocusedHook()
+        {
+            EditorWindow focused = EditorWindow.focusedWindow;
+            if (focused == null) return null;
+            for (int i = 0; i < Hooks.Count; i++)
+            {
+                if (Hooks[i].Window == focused) return Hooks[i].IsUsable ? Hooks[i] : null;
+            }
+            return null;
         }
 
         static void Tick()
@@ -75,8 +93,14 @@ namespace Nyvion.Backtrack
             return false;
         }
 
-        static void DetachAll()
+        static void OnSelectionChanged()
         {
+            for (int i = 0; i < Hooks.Count; i++) Hooks[i].OnSelectionChanged();
+        }
+
+        static void OnBeforeAssemblyReload()
+        {
+            ShortcutManager.UnregisterContext(ShortcutContext);
             for (int i = 0; i < Hooks.Count; i++) Hooks[i].Detach();
             Hooks.Clear();
         }
@@ -91,6 +115,12 @@ namespace Nyvion.Backtrack
         {
             BacktrackState.instance.ClearAll();
             for (int i = 0; i < Hooks.Count; i++) Hooks[i].ResetLastSeen();
+            RepaintAll();
+        }
+
+        static void OnShortcutsChanged<T>(T _)
+        {
+            BrowserHook.InvalidateContents();
             RepaintAll();
         }
 

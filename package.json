@@ -1,8 +1,8 @@
 {
   "name": "com.nyvion.backtrack",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Backtrack: Project Window Navigation",
-  "description": "Back and Forward buttons for the Unity Project window toolbar. Folder history like a web browser, for every Project window, kept across domain reloads. Right click either button to jump anywhere in the history.",
+  "description": "Back, Forward and Up for the Unity Project window toolbar. Folder history like a web browser, for every Project window, with mouse side buttons, rebindable Alt+arrow shortcuts, and scroll and selection restored when you go back. Right click Back or Forward to jump anywhere in the history.",
   "unity": "6000.0",
   "documentationUrl": "https://github.com/razzorblade/unity-project-window-navigation#readme",
   "changelogUrl": "https://github.com/razzorblade/unity-project-window-navigation/blob/main/CHANGELOG.md",
@@ -15,7 +15,10 @@
     "forward button",
     "folder history",
     "editor",
-    "productivity"
+    "productivity",
+    "up button",
+    "mouse side buttons",
+    "shortcuts"
   ],
   "author": {
     "name": "Nyvion",
